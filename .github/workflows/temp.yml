@@ -1,0 +1,31 @@
+name: Fix VoltAgent Upstream
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Fix upstream remote
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Remove old upstream (PawanOsman/voltagent)
+          git remote remove upstream 2>/dev/null || true
+          
+          # Add correct upstream (VoltAgent/voltagent)
+          git remote add upstream https://github.com/VoltAgent/voltagent.git
+          git fetch upstream
+          
+          # Sync main branch
+          git checkout main
+          git merge upstream/main --no-edit --strategy-option=theirs
+          git push origin main --force-with-lease
+          
+          echo "✅ Fixed upstream - now points to VoltAgent/voltagent"
